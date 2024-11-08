@@ -36,7 +36,7 @@ exports.create = (req, res) => {
     lastName: req.body.lastName,
     email: req.body.email,
     favoriteColor: req.body.favoriteColor,
-    birthdate: req.body.birthdate
+    birthdate: req.body.birthdate,
   });
   // Save Contact in the database
   contact
@@ -53,6 +53,9 @@ exports.create = (req, res) => {
 };
 
 exports.findAll = (req, res) => {
+  /*
+    #swagger.description = 'Api key needed -> Ezl0961tEpx2UxTZ5v2uKFK91qdNAr5npRlMT1zLcE3Mg68Xwaj3N8Dyp1R8IvFenrVwHRllOUxF0Og00l0m9NcaYMtH6Bpgdv7N'
+  */
   console.log(req.header("apiKey"));
   if (req.header("apiKey") === apiKey) {
     Contact.find(
@@ -82,17 +85,20 @@ exports.findAll = (req, res) => {
 
 // Find a single Contact by id
 exports.findOne = (req, res) => {
+  /*
+    #swagger.description = 'Api key needed -> Ezl0961tEpx2UxTZ5v2uKFK91qdNAr5npRlMT1zLcE3Mg68Xwaj3N8Dyp1R8IvFenrVwHRllOUxF0Og00l0m9NcaYMtH6Bpgdv7N'
+  */
+
   const contact_id = req.params.contact_id;
   if (req.header("apiKey") === apiKey) {
-    // Usar findOne en lugar de find, ya que findOne devuelve un solo objeto o null
     Contact.findOne({ _id: contact_id })
-    .then((data) => {
+      .then((data) => {
         if (!data) {
           res
             .status(404)
             .send({ message: "Not found Contact with id " + contact_id });
         } else {
-          res.send(data); // No se necesita acceder a data[0] con findOne
+          res.send(data);
         }
       })
       .catch((err) => {
@@ -104,30 +110,47 @@ exports.findOne = (req, res) => {
     res.send("Invalid apiKey, please read the documentation.");
   }
 };
-// // Update a Contact by the id in the request
-// exports.update = (req, res) => {
-//   if (!req.body) {
-//     return res.status(400).send({
-//       message: 'Data to update can not be empty!',
-//     });
-//   }
 
-//   const id = req.params.id;
+// Update a Contact by the id in the request
+// Update a Contact by the id in the request
+exports.update = (req, res) => {
+  /*
+    #swagger.description = 'Api key needed -> Ezl0961tEpx2UxTZ5v2uKFK91qdNAr5npRlMT1zLcE3Mg68Xwaj3N8Dyp1R8IvFenrVwHRllOUxF0Og00l0m9NcaYMtH6Bpgdv7N'
+  */
 
-//   Temple.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-//     .then((data) => {
-//       if (!data) {
-//         res.status(404).send({
-//           message: `Cannot update Temple with id=${id}. Maybe Temple was not found!`,
-//         });
-//       } else res.send({ message: 'Temple was updated successfully.' });
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message: 'Error updating Temple with id=' + id,
-//       });
-//     });
-// };
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update can not be empty!",
+    });
+  }
+
+  const contact_id = req.params.contact_id;
+
+  // Check for API key authorization
+  if (req.header("apiKey") !== apiKey) {
+    return res.status(403).send({
+      message: "Invalid API Key",
+    });
+  }
+
+  // Update the contact by its ID
+  Contact.findByIdAndUpdate(contact_id, req.body, { new: true, useFindAndModify: false })
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot update Contact with contact_id=${contact_id}. Maybe Contact was not found!`,
+        });
+      } else {
+        res.send({ message: "Contact was updated successfully.", data });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Error updating Contact with contact_id=" + contact_id,
+      });
+    });
+};
+
 
 // // Delete a Temple with the specified id in the request
 // exports.delete = (req, res) => {
