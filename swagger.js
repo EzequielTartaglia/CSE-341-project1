@@ -9,7 +9,7 @@ const doc = {
     description: 'API documentation for contact routes'
   },
   host: host,
-  schemes: isProduction ? ['https'] : ['http']
+  schemes: 'http'
 };
 
 const outputFile = './swagger.json';
