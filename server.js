@@ -1,25 +1,36 @@
 const express = require('express');
-const connectDB = require('./routes/db/connectDB');
-require('dotenv').config();
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Connect to MongoDB
-connectDB();
+app
+  .use(cors())
+  .use(express.json())
+  .use(express.urlencoded({ extended: true }));
 
-// Middleware to parse JSON
-app.use(express.json());
+// Set up Swagger documentation route first
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Routes
-const contactRoutes = require('./routes/contacts.js');
-app.use('/api/contacts', contactRoutes);
+// Import and use the main routes
+app.use('/', require('./routes'));
 
-app.get('/', (req, res) => {
-  res.send('Server running');
-});
+const db = require('./models');
+db.mongoose
+  .connect(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('Connected to the database!');
+  })
+  .catch((err) => {
+    console.log('Cannot connect to the database!', err);
+    process.exit();
+  });
 
-// Start the server
+
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}.`);
 });
