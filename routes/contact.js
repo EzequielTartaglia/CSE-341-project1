@@ -8,4 +8,6 @@ routes.post('/', contacts.create);
 
 routes.put('/:contact_id', contacts.update);
 
+routes.delete('/:contact_id', contacts.delete)
+
 module.exports = routes;

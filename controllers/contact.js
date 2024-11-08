@@ -38,6 +38,7 @@ exports.create = (req, res) => {
     favoriteColor: req.body.favoriteColor,
     birthdate: req.body.birthdate,
   });
+
   // Save Contact in the database
   contact
     .save(contact)
@@ -119,52 +120,75 @@ exports.update = (req, res) => {
 
   if (!req.body) {
     return res.status(400).send({
-      message: "Data to update can not be empty!",
+      message: "Data to update cannot be empty!",
     });
   }
 
   const contact_id = req.params.contact_id;
-  if (req.header("apiKey") === apiKey) {
-    Contact.findOne({ _id: contact_id });
 
-    Contact.findByIdAndUpdate(contact_id, req.body, { useFindAndModify: false })
-      .then((data) => {
-        if (!data) {
+  // API Key
+  if (req.header("apiKey") === apiKey) {
+    // Update and return the updated Contact
+    Contact.findByIdAndUpdate(contact_id, req.body, {
+      new: true,
+      useFindAndModify: false,
+    })
+      .then((updatedContact) => {
+        if (!updatedContact) {
           res.status(404).send({
             message: `Cannot update Contact with contact_id=${contact_id}. Maybe Contact was not found!`,
           });
-        } else res.send({ message: "Contact was updated successfully." });
+        } else {
+          res.send(updatedContact);
+        }
       })
       .catch((err) => {
         res.status(500).send({
           message: "Error updating Contact with contact_id=" + contact_id,
         });
       });
+  } else {
+    res.status(403).send({
+      message: "Invalid API Key",
+    });
   }
 };
 
-// // Delete a Temple with the specified id in the request
-// exports.delete = (req, res) => {
-//   const id = req.params.id;
+// Delete a Contact with the specified id in the request
+exports.delete = (req, res) => {
+  /*
+    #swagger.description = 'Api key needed -> Ezl0961tEpx2UxTZ5v2uKFK91qdNAr5npRlMT1zLcE3Mg68Xwaj3N8Dyp1R8IvFenrVwHRllOUxF0Og00l0m9NcaYMtH6Bpgdv7N'
+  */
 
-//   Temple.findByIdAndRemove(id)
-//     .then((data) => {
-//       if (!data) {
-//         res.status(404).send({
-//           message: `Cannot delete Temple with id=${id}. Maybe Temple was not found!`,
-//         });
-//       } else {
-//         res.send({
-//           message: 'Temple was deleted successfully!',
-//         });
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message: 'Could not delete Temple with id=' + id,
-//       });
-//     });
-// };
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to delete cannot be empty!",
+    });
+  }
+
+  const contact_id = req.params.contact_id;
+
+  // API Key
+  if (req.header("apiKey") === apiKey) {
+    Contact.findByIdAndRemove(contact_id)
+      .then((data) => {
+        if (!data) {
+          res.status(404).send({
+            message: `Cannot delete Contact with contact_id=${contact_id}. Maybe Contact was not found!`,
+          });
+        } else {
+          res.send({
+            message: "Contact was deleted successfully!",
+          });
+        }
+      })
+      .catch((err) => {
+        res.status(500).send({
+          message: "Could not delete Contact with contact_id=" + contact_id,
+        });
+      });
+  }
+};
 
 // // Delete all Temples from the database.
 // exports.deleteAll = (req, res) => {
@@ -181,4 +205,3 @@ exports.update = (req, res) => {
 //       });
 //     });
 // };
-
