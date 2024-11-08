@@ -112,7 +112,6 @@ exports.findOne = (req, res) => {
 };
 
 // Update a Contact by the id in the request
-// Update a Contact by the id in the request
 exports.update = (req, res) => {
   /*
     #swagger.description = 'Api key needed -> Ezl0961tEpx2UxTZ5v2uKFK91qdNAr5npRlMT1zLcE3Mg68Xwaj3N8Dyp1R8IvFenrVwHRllOUxF0Og00l0m9NcaYMtH6Bpgdv7N'
@@ -125,32 +124,24 @@ exports.update = (req, res) => {
   }
 
   const contact_id = req.params.contact_id;
+  if (req.header("apiKey") === apiKey) {
+    Contact.findOne({ _id: contact_id });
 
-  // Check for API key authorization
-  if (req.header("apiKey") !== apiKey) {
-    return res.status(403).send({
-      message: "Invalid API Key",
-    });
-  }
-
-  // Update the contact by its ID
-  Contact.findByIdAndUpdate(contact_id, req.body, { new: true, useFindAndModify: false })
-    .then((data) => {
-      if (!data) {
-        res.status(404).send({
-          message: `Cannot update Contact with contact_id=${contact_id}. Maybe Contact was not found!`,
+    Contact.findByIdAndUpdate(contact_id, req.body, { useFindAndModify: false })
+      .then((data) => {
+        if (!data) {
+          res.status(404).send({
+            message: `Cannot update Contact with contact_id=${contact_id}. Maybe Contact was not found!`,
+          });
+        } else res.send({ message: "Contact was updated successfully." });
+      })
+      .catch((err) => {
+        res.status(500).send({
+          message: "Error updating Contact with contact_id=" + contact_id,
         });
-      } else {
-        res.send({ message: "Contact was updated successfully.", data });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error updating Contact with contact_id=" + contact_id,
       });
-    });
+  }
 };
-
 
 // // Delete a Temple with the specified id in the request
 // exports.delete = (req, res) => {
@@ -191,16 +182,3 @@ exports.update = (req, res) => {
 //     });
 // };
 
-// // Find all published Temples
-// exports.findAllPublished = (req, res) => {
-//   Temple.find({ published: true })
-//     .then((data) => {
-//       res.send(data);
-//     })
-//     .catch((err) => {
-//       res.status(500).send({
-//         message:
-//           err.message || 'Some error occurred while retrieving temple.',
-//       });
-//     });
-// };
