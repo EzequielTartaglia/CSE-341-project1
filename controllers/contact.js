@@ -126,10 +126,27 @@ exports.update = (req, res) => {
 
   const contact_id = req.params.contact_id;
 
-  // API Key
+  // API Key validation
   if (req.header("apiKey") === apiKey) {
-    // Update and return the updated Contact
-    Contact.findByIdAndUpdate(contact_id, req.body, {
+    // Create an object with the fields that need to be updated
+    const updateFields = {};
+
+    // Check which fields are present in the request body and add them to updateFields
+    if (req.body.firstName) updateFields.firstName = req.body.firstName;
+    if (req.body.lastName) updateFields.lastName = req.body.lastName;
+    if (req.body.email) updateFields.email = req.body.email;
+    if (req.body.favoriteColor) updateFields.favoriteColor = req.body.favoriteColor;
+    if (req.body.birthdate) updateFields.birthdate = req.body.birthdate;
+
+    // If there are no fields to update, return a 400 error
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).send({
+        message: "At least one field must be provided to update.",
+      });
+    }
+
+    // Update the contact with the specified fields
+    Contact.findByIdAndUpdate(contact_id, updateFields, {
       new: true,
       useFindAndModify: false,
     })
@@ -153,6 +170,7 @@ exports.update = (req, res) => {
     });
   }
 };
+
 
 // Delete a Contact with the specified id in the request
 exports.delete = (req, res) => {
