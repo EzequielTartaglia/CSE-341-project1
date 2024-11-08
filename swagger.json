@@ -5,10 +5,11 @@
     "description": "API documentation for contact routes",
     "version": "1.0.0"
   },
-  "host": "localhost:8080",
+  "host": "cse-341-project1-gmay.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "paths": {
     "/contacts/": {
