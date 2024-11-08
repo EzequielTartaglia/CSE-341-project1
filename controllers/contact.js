@@ -80,17 +80,20 @@ exports.findAll = (req, res) => {
   }
 };
 
-// Find a single Contact with an id
+// Find a single Contact by id
 exports.findOne = (req, res) => {
   const contact_id = req.params.contact_id;
   if (req.header("apiKey") === apiKey) {
-    Contact.find({ contact_id: contact_id })
-      .then((data) => {
-        if (!data)
+    // Usar findOne en lugar de find, ya que findOne devuelve un solo objeto o null
+    Contact.findOne({ _id: contact_id })
+    .then((data) => {
+        if (!data) {
           res
             .status(404)
             .send({ message: "Not found Contact with id " + contact_id });
-        else res.send(data);
+        } else {
+          res.send(data); // No se necesita acceder a data[0] con findOne
+        }
       })
       .catch((err) => {
         res.status(500).send({
@@ -101,7 +104,6 @@ exports.findOne = (req, res) => {
     res.send("Invalid apiKey, please read the documentation.");
   }
 };
-
 // // Update a Contact by the id in the request
 // exports.update = (req, res) => {
 //   if (!req.body) {
